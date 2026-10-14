@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Kestrel Home - Returns Risk</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold;}
+        input, select { width: 100%; padding: 8px; box-sizing: border-box; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; cursor: pointer; }
+        #result { margin-top: 20px; padding: 15px; background: #f8f9fa; border-left: 4px solid #007bff; }
+    </style>
+</head>
+<body>
+    <h2>Check Order Risk</h2>
+    <div class="form-group">
+        <label>JSON Order Payload (Simulated from Checkout)</label>
+        <textarea id="payload" rows="15" style="width: 100%; font-family: monospace;">
+{
+  "sales_channel": 1,
+  "payment_mode": 2,
+  "discount_pct": 0.05,
+  "qty": 1,
+  "order_value_inr": 4500.0,
+  "promised_delivery_days": 3,
+  "delivery_pincode": 411001,
+  "is_gift": 0,
+  "customer_prior_orders": 2,
+  "customer_prior_returns": 0,
+  "source": 0,
+  "city": 5,
+  "state": 2,
+  "shield_member": 0,
+  "family": 3,
+  "list_price_inr": 5000.0,
+  "warranty_months": 12
+}
+        </textarea>
+    </div>
+    <button onclick="checkRisk()">Check Risk</button>
+    <div id="result" style="display: none;"></div>
+
+    <script>
+        async function checkRisk() {
+            const payload = document.getElementById('payload').value;
+            const res = await fetch('/predict', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: payload
+            });
+            const data = await res.json();
+            const resultDiv = document.getElementById('result');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = `<strong>Risk Score:</strong> ${(data.risk_score * 100).toFixed(1)}%<br><br><strong>Action/Reasons:</strong><br>${data.reasons.join('<br>')}`;
+        }
+    </script>
+</body>
+</html>
